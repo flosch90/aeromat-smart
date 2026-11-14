@@ -53,9 +53,9 @@ ATmega328P as controller, P82B96 as I²C buffer to the control panel, MC34063 fo
 | Red (VAC1) | terminal 18 (+24 V) |
 | Black (VAC2) | terminal 17 (GND) |
 | Green (GND) | terminal 12 |
-| OUT1 a | pin 1 (GND) |
-| OUT1 b | pin 6 (button) |
-| Orange (IN1) | pin 1 |
+| Output 1 (switch:1), wire a | pin 1 (GND) |
+| Output 1 (switch:1), wire b | pin 6 (button) |
+| Input 0 (input:0) | pin 1 |
 | Blue / yellow / green | optional DHT22 (DATA / VCC / GND) |
 | remaining wires | unused, insulate individually |
 
@@ -63,7 +63,7 @@ ATmega328P as controller, P82B96 as I²C buffer to the control panel, MC34063 fo
 
 ## Shelly setup
 
-1. Inputs **detached**, OUT1 **auto-off 0.3 s**, state after power failure **off**.
+1. Inputs **detached**, output 1 (switch:1) **auto-off 0.3 s**, state after power failure **off**.
 2. Create the script `shelly/aeromat-loxone.js`, start it and enable **Run on startup**.
 3. Set the UDP target (any free port):
    `http://SHELLY-IP/rpc/Sys.SetConfig?config={"rpc_udp":{"dst_addr":"MINISERVER-IP:7010"}}`

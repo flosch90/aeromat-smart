@@ -1,7 +1,8 @@
 // =====================================================================
 //  AEROMAT VT WRG 1100 – fan level control with Shelly Plus Uni + Loxone
 // ---------------------------------------------------------------------
-//  OUT1/OUT2       presses the membrane button   (pin 6 <-> pin 1), see CFG.outputId
+//  Output 1 (switch:1)  presses the membrane button   (pin 6 <-> pin 1)
+//  Input 0 (input:0)    reads the button line (optional, see useInput)
 //  Level cycle:     Off(0) -> 1 -> 2 -> 3 -> Off(0)
 //
 //  Control from Loxone (Virtual Output, HTTP, no login):
@@ -25,17 +26,17 @@
 
 let CFG = {
   // false: the level is tracked by counting the script's own pulses
-  //        (use this when IN1 is not wired to pin 6).
-  // true:  IN1 on pin 6 counts every press, including manual ones on the unit.
+  //        (use this when input 0 does not see the button presses).
+  // true:  input 0 counts every press, including manual ones on the unit.
   useInput: false,
 
-  outputId: 0,        // Shelly output that presses the button: 0 = OUT1, 1 = OUT2
-  inputId: 0,         // Shelly input that reads the button line: 0 = IN1, 1 = IN2
+  outputId: 1,        // Shelly output that presses the button (switch:1)
+  inputId: 0,         // Shelly input that reads the button line (input:0)
 
   startLevel: 1,      // level after a power failure (the unit starts in level 1)
   pulseMs: 300,       // duration of one button press
   gapMs: 700,         // pause after each press
-  debounceMs: 250,    // debounce for IN1
+  debounceMs: 250,    // debounce for the input
 
   // Mapping of fan speed in % (e.g. from the Loxone ventilation block)
   // 0 % = off, up to pct1 = level 1, up to pct2 = level 2, above = level 3
@@ -72,7 +73,7 @@ function pulse() {
     if (!CFG.useInput) {
       advance();
     } else if (!edgeSeen) {
-      print("Warning: pulse not detected on IN1, counting anyway");
+      print("Warning: pulse not detected on input " + CFG.inputId + ", counting anyway");
       advance();
     }
     busy = false;
@@ -92,7 +93,7 @@ function setTarget(l) {
   return true;
 }
 
-// --- IN1: detect button presses (only with useInput: true) -------------
+// --- Input: detect button presses (only with useInput: true) -----------
 Shelly.addStatusHandler(function (e) {
   if (!CFG.useInput) return;
   if (e.component !== "input:" + CFG.inputId || !e.delta || e.delta.state !== true) return;
@@ -179,4 +180,4 @@ HTTPServer.registerEndpoint("ventilation", function (req, res) {
 // --- Start ----------------------------------------------------------------
 Shelly.call("Switch.Set", { id: CFG.outputId, on: false });
 scheduleReport();
-print("AEROMAT script started, level " + level + ", IN1 " + (CFG.useInput ? "enabled" : "disabled"));
+print("AEROMAT script started, level " + level + ", input " + (CFG.useInput ? "enabled" : "disabled"));

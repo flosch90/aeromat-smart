@@ -93,13 +93,13 @@ code { font-family: var(--font-mono); font-size: 13px; }
   <header>
     <div class="eyebrow">Siegenia AEROMAT VT WRG 1100 · Shelly Plus Uni</div>
     <h1>Shelly wiring on the membrane button</h1>
-    <p class="lead">OUT1 presses the button by briefly connecting pin 6 to pin 1. Power comes from the 24 V terminals of the main board. Everything stays on the low-voltage side.</p>
+    <p class="lead">Output 1 (switch:1) presses the button by briefly connecting pin 6 to pin 1. Power comes from the 24 V terminals of the main board. Everything stays on the low-voltage side.</p>
   </header>
 
   <section>
     <h2>Wiring diagram</h2>
     <div class="figure">
-      <svg viewBox="0 0 570 480" role="img" aria-label="Wiring diagram: Shelly red to terminal 18, black to terminal 17, green to terminal 12, OUT1 to pin 1 and pin 6, orange IN1 to pin 1, brown unused">
+      <svg viewBox="0 0 570 480" role="img" aria-label="Wiring diagram: Shelly red to terminal 18, black to terminal 17, green to terminal 12, output 1 to pin 1 and pin 6, input 0 to pin 1, brown unused">
         <!-- Shelly -->
         <text x="20" y="32" font-weight="600" font-size="15">Shelly Plus Uni</text>
         <rect x="20" y="45" width="190" height="395" rx="10" fill="var(--surface)" stroke="var(--fg)" stroke-width="1.6"/>
@@ -107,10 +107,10 @@ code { font-family: var(--font-mono); font-size: 13px; }
           <text x="192" y="84">Red · VAC1 (+)</text>
           <text x="192" y="119">Black · VAC2 (−)</text>
           <text x="192" y="169">Green · GND</text>
-          <text x="192" y="226">Black · OUT1 a</text>
+          <text x="192" y="226">Output 1 · a</text>
           <text x="192" y="294">Brown · IN2</text>
-          <text x="192" y="388">Black · OUT1 b</text>
-          <text x="192" y="416">Orange · IN1</text>
+          <text x="192" y="388">Output 1 · b</text>
+          <text x="192" y="416">Input 0</text>
         </g>
         <circle cx="210" cy="80" r="5" fill="var(--wire-red)"/>
         <circle cx="210" cy="115" r="5" fill="var(--wire-black)"/>
@@ -172,9 +172,9 @@ code { font-family: var(--font-mono); font-size: 13px; }
           <tr><td><span class="sw" style="background:var(--wire-red)"></span>Red · VAC1</td><td>terminal 18 (+24 V)</td><td>measured</td></tr>
           <tr><td><span class="sw" style="background:var(--wire-black)"></span>Black · VAC2</td><td>terminal 17 (GND)</td><td>measured</td></tr>
           <tr><td><span class="sw" style="background:var(--wire-green)"></span>Green · GND</td><td>terminal 12</td><td>same ground as pin 1</td></tr>
-          <tr><td><span class="sw" style="background:var(--wire-black)"></span>OUT1 a</td><td>pin 1 (GND)</td><td>polarity does not matter</td></tr>
-          <tr><td><span class="sw" style="background:var(--wire-black)"></span>OUT1 b</td><td>pin 6 (button)</td><td>polarity does not matter</td></tr>
-          <tr><td><span class="sw" style="background:var(--wire-orange)"></span>Orange · IN1</td><td>pin 1 (GND)</td><td></td></tr>
+          <tr><td><span class="sw" style="background:var(--wire-black)"></span>Output 1 (switch:1), wire a</td><td>pin 1 (GND)</td><td>polarity does not matter</td></tr>
+          <tr><td><span class="sw" style="background:var(--wire-black)"></span>Output 1 (switch:1), wire b</td><td>pin 6 (button)</td><td>polarity does not matter</td></tr>
+          <tr><td><span class="sw" style="background:var(--wire-orange)"></span>Input 0 (input:0)</td><td>pin 1 (GND)</td><td></td></tr>
           <tr><td><span class="sw" style="background:var(--wire-brown)"></span>Brown · IN2</td><td>unused</td><td>insulate</td></tr>
           <tr><td>White, yellow, blue, grey, violet</td><td>unused</td><td>insulate individually</td></tr>
         </tbody>
@@ -198,8 +198,8 @@ code { font-family: var(--font-mono); font-size: 13px; }
     <h2>Shelly settings</h2>
     <ul class="plain">
       <li>Inputs: <b>detached</b>.</li>
-      <li>OUT1: <b>auto-off after 0.3 s</b> and state after power failure <b>off</b>.</li>
-      <li>No actions or scenes that link IN1 to OUT1.</li>
+      <li>Output 1 (switch:1): <b>auto-off after 0.3 s</b> and state after power failure <b>off</b>.</li>
+      <li>No actions or scenes that link input 0 to output 1.</li>
       <li>Script “aeromat-loxone.js” with <b>Run on startup</b>.</li>
     </ul>
     <p class="lead">Test via the script, adjust IP and script ID if needed:</p>
