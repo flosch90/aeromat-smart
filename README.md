@@ -107,3 +107,7 @@ Das Skript zählt seine eigenen Pulse (`useInput: false`). Ein Druck am Gerät v
 ## Optional: CO₂
 
 ESP32 + Sensirion SCD41 mit [`esphome/co2-raum.yaml`](esphome/co2-raum.yaml). Loxone liest den Wert per Virtuellem HTTP-Eingang `http://ESP-IP/sensor/co2` mit Befehlserkennung `"value":\v` und gibt ihn an den CO2-Eingang des Lüftungsbausteins.
+
+## Lizenz
+
+[MIT](LICENSE)
