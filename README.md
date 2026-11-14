@@ -80,7 +80,7 @@ ATmega328P as controller, P82B96 as I²C buffer to the control panel, MC34063 fo
 | `?sync=0..3` | correct the counter without pressing |
 | no parameter | status as JSON |
 
-The script counts its own pulses (`useInput: false`). A press on the unit puts the counter out of step until Loxone sends the next value or `?sync=` is called.
+With `useInput: true` (default) input 0 detects every press, including manual presses on the unit, so the level stays in sync. With `useInput: false` the script only counts its own pulses; a press on the unit then puts the counter out of step until Loxone sends the next value or `?sync=` is called. Set `debug: true` to log every input edge in the script console.
 
 ## Loxone setup
 

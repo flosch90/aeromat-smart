@@ -25,10 +25,12 @@
 // =====================================================================
 
 let CFG = {
-  // false: the level is tracked by counting the script's own pulses
-  //        (use this when input 0 does not see the button presses).
-  // true:  input 0 counts every press, including manual ones on the unit.
-  useInput: false,
+  // true:  input 0 counts every press, including manual ones on the unit
+  //        (a normal press pulls the button line low for approx. 0.2 s).
+  // false: the level is tracked only by counting the script's own pulses
+  //        (use this if input 0 does not see the button presses).
+  useInput: true,
+  debug: false,       // true: print every input edge to the script console
 
   outputId: 1,        // Shelly output that presses the button (switch:1)
   inputId: 0,         // Shelly input that reads the button line (input:0)
@@ -36,7 +38,7 @@ let CFG = {
   startLevel: 1,      // level after a power failure (the unit starts in level 1)
   pulseMs: 300,       // duration of one button press
   gapMs: 700,         // pause after each press
-  debounceMs: 250,    // debounce for the input
+  debounceMs: 150,    // ignore further presses within this time
 
   // Mapping of fan speed in % (e.g. from the Loxone ventilation block)
   // 0 % = off, up to pct1 = level 1, up to pct2 = level 2, above = level 3
@@ -56,6 +58,10 @@ let pulseActive = false;
 let edgeSeen = false;
 let lastEdge = 0;
 let reportTimer = null;
+
+function nowMs() {
+  return typeof Shelly.getUptimeMs === "function" ? Shelly.getUptimeMs() : Date.now();
+}
 
 function advance() {
   level = (level + 1) % 4;
@@ -96,8 +102,10 @@ function setTarget(l) {
 // --- Input: detect button presses (only with useInput: true) -----------
 Shelly.addStatusHandler(function (e) {
   if (!CFG.useInput) return;
-  if (e.component !== "input:" + CFG.inputId || !e.delta || e.delta.state !== true) return;
-  let now = Date.now();
+  if (e.component !== "input:" + CFG.inputId || !e.delta || typeof e.delta.state !== "boolean") return;
+  if (CFG.debug) print("Input " + CFG.inputId + ": " + (e.delta.state ? "pressed" : "released"));
+  if (e.delta.state !== true) return;
+  let now = nowMs();
   if (now - lastEdge < CFG.debounceMs) return;
   lastEdge = now;
   advance();
