@@ -1,51 +1,52 @@
 // =====================================================================
-//  AEROMAT VT WRG 1100 – Stufensteuerung mit Shelly Plus Uni + Loxone
+//  AEROMAT VT WRG 1100 – fan level control with Shelly Plus Uni + Loxone
 // ---------------------------------------------------------------------
-//  OUT1 (switch:0)  drückt den Folientaster   (Pin 6 <-> Pin 1)
-//  Stufenzyklus:    Aus(0) -> 1 -> 2 -> 3 -> Aus(0)
+//  OUT1 (switch:0)  presses the membrane button   (pin 6 <-> pin 1)
+//  Level cycle:     Off(0) -> 1 -> 2 -> 3 -> Off(0)
 //
-//  Steuerung von Loxone (Virtueller Ausgang, HTTP, ohne Login):
-//    /script/<ID>/lueftung?stufe=0..3   direkt auf Stufe
-//    /script/<ID>/lueftung?prozent=0..100  Lüftergeschwindigkeit in %, wird in Stufe umgerechnet
-//    /script/<ID>/lueftung?cmd=on       letzte Stufe (mind. 1)
-//    /script/<ID>/lueftung?cmd=off      Aus
-//    /script/<ID>/lueftung?cmd=next     eine Stufe weiter (Zyklus)
-//    /script/<ID>/lueftung?cmd=up       eine Stufe höher (max. 3)
-//    /script/<ID>/lueftung?cmd=down     eine Stufe tiefer (min. 0)
-//    /script/<ID>/lueftung?sync=0..3    Zähler korrigieren, ohne zu drücken
-//    /script/<ID>/lueftung              nur Status abfragen (JSON)
+//  Control from Loxone (Virtual Output, HTTP, no login):
+//    /script/<ID>/ventilation?level=0..3      go to level
+//    /script/<ID>/ventilation?percent=0..100  fan speed in %, mapped to a level
+//    /script/<ID>/ventilation?cmd=on          last level (at least 1)
+//    /script/<ID>/ventilation?cmd=off         off
+//    /script/<ID>/ventilation?cmd=next        one level further (cycle)
+//    /script/<ID>/ventilation?cmd=up          one level up (max. 3)
+//    /script/<ID>/ventilation?cmd=down        one level down (min. 0)
+//    /script/<ID>/ventilation?sync=0..3       correct the counter without pressing
+//    /script/<ID>/ventilation                 status only (JSON)
 //
-//  Rückmeldung an Loxone per UDP (keine Zugangsdaten nötig):
-//    Das Skript erzeugt ein Shelly-Ereignis "aeromat". Der Shelly
-//    schickt es über "RPC over UDP" an den Miniserver, z. B.:
-//    ..."data":{"aeromat_stufe":2,"aeromat_an":1,"aeromat_s1":0,
-//               "aeromat_s2":1,"aeromat_s3":0}...
-//    Voraussetzung: rpc_udp.dst_addr = MINISERVER-IP:PORT im Shelly.
+//  Feedback to Loxone via UDP (no credentials needed):
+//    The script emits a Shelly event "aeromat". The Shelly sends it to the
+//    Miniserver via "RPC over UDP", e.g.:
+//    ..."data":{"aeromat_level":2,"aeromat_on":1,"aeromat_l1":0,
+//               "aeromat_l2":1,"aeromat_l3":0}...
+//    Requirement: rpc_udp.dst_addr = MINISERVER-IP:PORT on the Shelly.
 // =====================================================================
 
 let CFG = {
-  // false: Stufe wird über die eigenen Pulse mitgezählt (passend, wenn IN1 nicht an Pin 6 hängt).
-  // true:  IN1 an Pin 6 zählt jeden Druck, auch manuelle am Gerät.
+  // false: the level is tracked by counting the script's own pulses
+  //        (use this when IN1 is not wired to pin 6).
+  // true:  IN1 on pin 6 counts every press, including manual ones on the unit.
   useInput: false,
 
-  startStage: 1,      // Stufe nach Stromausfall (Gerät startet in Stufe 1)
-  pulseMs: 300,       // Dauer eines Tastendrucks
-  gapMs: 700,         // Pause nach jedem Druck
-  debounceMs: 250,    // Entprellung für IN1
+  startLevel: 1,      // level after a power failure (the unit starts in level 1)
+  pulseMs: 300,       // duration of one button press
+  gapMs: 700,         // pause after each press
+  debounceMs: 250,    // debounce for IN1
 
-  // Umrechnung Lüftergeschwindigkeit in % (z. B. von der Loxone-Raumlüftungssteuerung)
-  // 0 % = Aus, bis pct1 = Stufe 1, bis pct2 = Stufe 2, darüber Stufe 3
+  // Mapping of fan speed in % (e.g. from the Loxone ventilation block)
+  // 0 % = off, up to pct1 = level 1, up to pct2 = level 2, above = level 3
   pct1: 40,
   pct2: 75,
 
-  reportDelayMs: 1500, // erst melden, wenn die Stufe stabil ist
-  heartbeatS: 60       // Status zusätzlich regelmäßig senden (0 = aus)
+  reportDelayMs: 1500, // report only once the level is stable
+  heartbeatS: 60       // also send the status periodically (0 = off)
 };
 
 // ---------------------------------------------------------------------
-let stage = CFG.startStage;
-let target = CFG.startStage;
-let lastOn = CFG.startStage > 0 ? CFG.startStage : 1;
+let level = CFG.startLevel;
+let target = CFG.startLevel;
+let lastOn = CFG.startLevel > 0 ? CFG.startLevel : 1;
 let busy = false;
 let pulseActive = false;
 let edgeSeen = false;
@@ -53,8 +54,8 @@ let lastEdge = 0;
 let reportTimer = null;
 
 function advance() {
-  stage = (stage + 1) % 4;
-  if (stage > 0) lastOn = stage;
+  level = (level + 1) % 4;
+  if (level > 0) lastOn = level;
   scheduleReport();
 }
 
@@ -68,7 +69,7 @@ function pulse() {
     if (!CFG.useInput) {
       advance();
     } else if (!edgeSeen) {
-      print("Warnung: Puls an IN1 nicht erkannt, zähle trotzdem weiter");
+      print("Warning: pulse not detected on IN1, counting anyway");
       advance();
     }
     busy = false;
@@ -77,18 +78,18 @@ function pulse() {
 }
 
 function process() {
-  if (busy || stage === target) return;
+  if (busy || level === target) return;
   pulse();
 }
 
-function setTarget(s) {
-  if (!(s >= 0 && s <= 3)) return false;
-  target = s;
+function setTarget(l) {
+  if (!(l >= 0 && l <= 3)) return false;
+  target = l;
   process();
   return true;
 }
 
-// --- IN1: Tastendrücke mitlesen (nur mit useInput: true) ---------------
+// --- IN1: detect button presses (only with useInput: true) -------------
 Shelly.addStatusHandler(function (e) {
   if (!CFG.useInput) return;
   if (e.component !== "input:0" || !e.delta || e.delta.state !== true) return;
@@ -99,19 +100,19 @@ Shelly.addStatusHandler(function (e) {
   if (pulseActive) {
     edgeSeen = true;
   } else {
-    target = stage;
-    print("Manuell geschaltet: Stufe " + stage);
+    target = level;
+    print("Manual press detected: level " + level);
   }
 });
 
-// --- Rückmeldung per UDP (Shelly-Ereignis) -----------------------------
+// --- Feedback via UDP (Shelly event) ------------------------------------
 function report() {
   Shelly.emitEvent("aeromat", {
-    aeromat_stufe: stage,
-    aeromat_an: stage > 0 ? 1 : 0,
-    aeromat_s1: stage === 1 ? 1 : 0,
-    aeromat_s2: stage === 2 ? 1 : 0,
-    aeromat_s3: stage === 3 ? 1 : 0
+    aeromat_level: level,
+    aeromat_on: level > 0 ? 1 : 0,
+    aeromat_l1: level === 1 ? 1 : 0,
+    aeromat_l2: level === 2 ? 1 : 0,
+    aeromat_l3: level === 3 ? 1 : 0
   });
 }
 
@@ -129,7 +130,7 @@ if (CFG.heartbeatS > 0) {
   });
 }
 
-// --- HTTP-Schnittstelle für Loxone ------------------------------------
+// --- HTTP interface for Loxone -------------------------------------------
 function parseQuery(q) {
   let r = {};
   if (!q) return r;
@@ -141,26 +142,26 @@ function parseQuery(q) {
   return r;
 }
 
-HTTPServer.registerEndpoint("lueftung", function (req, res) {
+HTTPServer.registerEndpoint("ventilation", function (req, res) {
   let q = parseQuery(req.query);
   let ok = true;
-  if (q.stufe !== undefined) ok = setTarget(Math.round(Number(q.stufe)));
-  else if (q.prozent !== undefined) {
-    let p = Number(q.prozent);
+  if (q.level !== undefined) ok = setTarget(Math.round(Number(q.level)));
+  else if (q.percent !== undefined) {
+    let p = Number(q.percent);
     if (!(p >= 0 && p <= 100)) ok = false;
     else ok = setTarget(p <= 0 ? 0 : (p <= CFG.pct1 ? 1 : (p <= CFG.pct2 ? 2 : 3)));
   }
-  else if (q.cmd === "on") ok = setTarget(stage > 0 ? stage : lastOn);
+  else if (q.cmd === "on") ok = setTarget(level > 0 ? level : lastOn);
   else if (q.cmd === "off") ok = setTarget(0);
   else if (q.cmd === "next") ok = setTarget((target + 1) % 4);
   else if (q.cmd === "up") ok = setTarget(Math.min(3, target + 1));
   else if (q.cmd === "down") ok = setTarget(Math.max(0, target - 1));
   else if (q.sync !== undefined) {
-    let s = Math.round(Number(q.sync));
-    if (s >= 0 && s <= 3) {
-      stage = s;
-      target = s;
-      if (s > 0) lastOn = s;
+    let l = Math.round(Number(q.sync));
+    if (l >= 0 && l <= 3) {
+      level = l;
+      target = l;
+      if (l > 0) lastOn = l;
       scheduleReport();
     } else {
       ok = false;
@@ -168,11 +169,11 @@ HTTPServer.registerEndpoint("lueftung", function (req, res) {
   }
   res.code = ok ? 200 : 400;
   res.headers = [["Content-Type", "application/json"]];
-  res.body = JSON.stringify({ stufe: stage, ziel: target, an: stage > 0 ? 1 : 0, busy: busy, ok: ok });
+  res.body = JSON.stringify({ level: level, target: target, on: level > 0 ? 1 : 0, busy: busy, ok: ok });
   res.send();
 });
 
-// --- Start --------------------------------------------------------------
+// --- Start ----------------------------------------------------------------
 Shelly.call("Switch.Set", { id: 0, on: false });
 scheduleReport();
-print("AEROMAT-Skript gestartet, Stufe " + stage + ", IN1 " + (CFG.useInput ? "aktiv" : "aus"));
+print("AEROMAT script started, level " + level + ", IN1 " + (CFG.useInput ? "enabled" : "disabled"));

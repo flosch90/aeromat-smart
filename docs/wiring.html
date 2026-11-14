@@ -1,13 +1,12 @@
 <!doctype html>
-<html lang="de">
+<html lang="en">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>AEROMAT Shelly-Anschluss</title>
-<meta name="claude:viewport-fit-sides" content="cover">
+<title>AEROMAT Shelly Wiring</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600&display=swap">
 <style>
-/* Layout: technical sheet – single column; wiring diagram first, then connection table, warnings, settings, stage cycle */
+/* Layout: technical sheet – single column; wiring diagram first, then connection table, warnings, settings, level cycle */
 :root {
   --bg: #f5f7f5;
   --surface: #ffffff;
@@ -42,6 +41,7 @@
   --bad: #ff8a80; --bad-bg: #2e1715; color-scheme: dark;
 }
 body {
+  margin: 0;
   background: var(--bg); color: var(--fg); font-family: var(--font-body);
   font-size: 15px; line-height: 1.55;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
@@ -92,24 +92,24 @@ code { font-family: var(--font-mono); font-size: 13px; }
 <main>
   <header>
     <div class="eyebrow">Siegenia AEROMAT VT WRG 1100 · Shelly Plus Uni</div>
-    <h1>Schaltplan Shelly am Folientaster</h1>
-    <p class="lead">OUT1 drückt den Taster, indem es Pin 6 kurz mit Pin 1 verbindet. Versorgung über die 24-V-Klemmen der Hauptplatine. Alles läuft auf der Niedervolt-Seite.</p>
+    <h1>Shelly wiring on the membrane button</h1>
+    <p class="lead">OUT1 presses the button by briefly connecting pin 6 to pin 1. Power comes from the 24 V terminals of the main board. Everything stays on the low-voltage side.</p>
   </header>
 
   <section>
-    <h2>Schaltbild</h2>
+    <h2>Wiring diagram</h2>
     <div class="figure">
-      <svg viewBox="0 0 570 480" role="img" aria-label="Schaltbild: Shelly Rot an Klemme 18, Schwarz an Klemme 17, Grün an Klemme 12, OUT1 an Pin 1 und Pin 6, Orange IN1 an Pin 1, Braun frei">
+      <svg viewBox="0 0 570 480" role="img" aria-label="Wiring diagram: Shelly red to terminal 18, black to terminal 17, green to terminal 12, OUT1 to pin 1 and pin 6, orange IN1 to pin 1, brown unused">
         <!-- Shelly -->
         <text x="20" y="32" font-weight="600" font-size="15">Shelly Plus Uni</text>
         <rect x="20" y="45" width="190" height="395" rx="10" fill="var(--surface)" stroke="var(--fg)" stroke-width="1.6"/>
         <g font-size="12.5" text-anchor="end">
-          <text x="192" y="84">Rot · VAC1 (+)</text>
-          <text x="192" y="119">Schwarz · VAC2 (−)</text>
-          <text x="192" y="169">Grün · GND</text>
-          <text x="192" y="226">Schwarz · OUT1 a</text>
-          <text x="192" y="294">Braun · IN2</text>
-          <text x="192" y="388">Schwarz · OUT1 b</text>
+          <text x="192" y="84">Red · VAC1 (+)</text>
+          <text x="192" y="119">Black · VAC2 (−)</text>
+          <text x="192" y="169">Green · GND</text>
+          <text x="192" y="226">Black · OUT1 a</text>
+          <text x="192" y="294">Brown · IN2</text>
+          <text x="192" y="388">Black · OUT1 b</text>
           <text x="192" y="416">Orange · IN1</text>
         </g>
         <circle cx="210" cy="80" r="5" fill="var(--wire-red)"/>
@@ -119,21 +119,21 @@ code { font-family: var(--font-mono); font-size: 13px; }
         <circle cx="210" cy="290" r="5" fill="var(--wire-brown)"/>
         <circle cx="210" cy="384" r="5" fill="var(--wire-black)"/>
         <circle cx="210" cy="412" r="5" fill="var(--wire-orange)"/>
-        <text x="20" y="464" class="muted" font-size="11.5">Weiß, Gelb, Blau, Grau, Lila: frei, einzeln isolieren</text>
+        <text x="20" y="464" class="muted" font-size="11.5">White, yellow, blue, grey, violet: unused, insulate individually</text>
 
-        <!-- Hauptplatine -->
-        <text x="330" y="32" font-weight="600" font-size="15" style="fill:var(--accent)">Hauptplatine Lüftung</text>
+        <!-- Main board -->
+        <text x="330" y="32" font-weight="600" font-size="15" style="fill:var(--accent)">Ventilation main board</text>
         <rect x="330" y="45" width="230" height="395" rx="10" fill="none" stroke="var(--accent)" stroke-width="2"/>
-        <text x="345" y="64" class="muted" font-size="11">Klemmleiste</text>
+        <text x="345" y="64" class="muted" font-size="11">Terminal block</text>
         <circle cx="362" cy="80" r="6" fill="var(--wire-red)"/>
         <circle cx="362" cy="115" r="6" fill="var(--wire-black)"/>
         <circle cx="362" cy="165" r="6" fill="var(--wire-black)"/>
         <g font-size="12">
-          <text x="376" y="84">+24 V · Klemme 18</text>
-          <text x="376" y="119">GND · Klemme 17</text>
-          <text x="376" y="169">GND · Klemme 12</text>
+          <text x="376" y="84">+24 V · terminal 18</text>
+          <text x="376" y="119">GND · terminal 17</text>
+          <text x="376" y="169">GND · terminal 12</text>
         </g>
-        <text x="345" y="192" font-size="12" font-weight="600">Roter Stecker (Bedienteil)</text>
+        <text x="345" y="192" font-size="12" font-weight="600">Red connector (control panel)</text>
         <rect x="345" y="202" width="36" height="226" rx="4" fill="none" stroke="var(--wire-red)" stroke-width="1.5"/>
         <rect x="352" y="212" width="22" height="36" rx="2" fill="var(--wire-black)"/>
         <rect x="352" y="260" width="22" height="12" rx="2" fill="var(--pin-free)"/>
@@ -143,20 +143,20 @@ code { font-family: var(--font-mono); font-size: 13px; }
         <rect x="352" y="374" width="22" height="46" rx="2" fill="var(--accent)"/>
         <g font-size="12" class="mono">
           <text x="392" y="234">1 · GND</text>
-          <text x="392" y="270" class="muted">2 · Datenbus</text>
-          <text x="392" y="298" class="muted">3 · Datenbus</text>
+          <text x="392" y="270" class="muted">2 · data bus</text>
+          <text x="392" y="298" class="muted">3 · data bus</text>
           <text x="392" y="326" class="muted">4 · –</text>
           <text x="392" y="354" class="muted">5 · –</text>
-          <text x="392" y="401" style="fill:var(--accent)">6 · Taster</text>
+          <text x="392" y="401" style="fill:var(--accent)">6 · button</text>
         </g>
 
-        <!-- Leitungen -->
+        <!-- Wires -->
         <line class="w" x1="215" y1="80" x2="356" y2="80" stroke="var(--wire-red)"/>
         <line class="w" x1="215" y1="115" x2="356" y2="115" stroke="var(--wire-black)"/>
         <line class="w" x1="215" y1="165" x2="356" y2="165" stroke="var(--wire-green)"/>
         <line class="w" x1="215" y1="222" x2="352" y2="222" stroke="var(--wire-black)"/>
         <line class="w" x1="215" y1="290" x2="236" y2="290" stroke="var(--wire-brown)"/>
-        <text x="218" y="308" class="muted" font-size="11">frei</text>
+        <text x="218" y="308" class="muted" font-size="11">unused</text>
         <path class="w" d="M215,384 H244 a6,6 0 0 1 12,0 H352" stroke="var(--wire-black)"/>
         <polyline class="w" points="215,412 250,412 250,240 352,240" stroke="var(--wire-orange)"/>
       </svg>
@@ -164,59 +164,59 @@ code { font-family: var(--font-mono); font-size: 13px; }
   </section>
 
   <section>
-    <h2>Belegung</h2>
+    <h2>Connections</h2>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Shelly-Ader</th><th>Anschluss</th><th>Hinweis</th></tr></thead>
+        <thead><tr><th>Shelly wire</th><th>Connection</th><th>Note</th></tr></thead>
         <tbody>
-          <tr><td><span class="sw" style="background:var(--wire-red)"></span>Rot · VAC1</td><td>Klemme 18 (+24 V)</td><td>gemessen</td></tr>
-          <tr><td><span class="sw" style="background:var(--wire-black)"></span>Schwarz · VAC2</td><td>Klemme 17 (GND)</td><td>gemessen</td></tr>
-          <tr><td><span class="sw" style="background:var(--wire-green)"></span>Grün · GND</td><td>Klemme 12</td><td>gleiche Masse wie Pin 1</td></tr>
-          <tr><td><span class="sw" style="background:var(--wire-black)"></span>OUT1 a</td><td>Pin 1 (GND)</td><td>Polarität egal</td></tr>
-          <tr><td><span class="sw" style="background:var(--wire-black)"></span>OUT1 b</td><td>Pin 6 (Taster)</td><td>Polarität egal</td></tr>
-          <tr><td><span class="sw" style="background:var(--wire-orange)"></span>Orange · IN1</td><td>Pin 1 (GND)</td><td></td></tr>
-          <tr><td><span class="sw" style="background:var(--wire-brown)"></span>Braun · IN2</td><td>frei</td><td>isolieren</td></tr>
-          <tr><td>Weiß, Gelb, Blau, Grau, Lila</td><td>frei</td><td>einzeln isolieren</td></tr>
+          <tr><td><span class="sw" style="background:var(--wire-red)"></span>Red · VAC1</td><td>terminal 18 (+24 V)</td><td>measured</td></tr>
+          <tr><td><span class="sw" style="background:var(--wire-black)"></span>Black · VAC2</td><td>terminal 17 (GND)</td><td>measured</td></tr>
+          <tr><td><span class="sw" style="background:var(--wire-green)"></span>Green · GND</td><td>terminal 12</td><td>same ground as pin 1</td></tr>
+          <tr><td><span class="sw" style="background:var(--wire-black)"></span>OUT1 a</td><td>pin 1 (GND)</td><td>polarity does not matter</td></tr>
+          <tr><td><span class="sw" style="background:var(--wire-black)"></span>OUT1 b</td><td>pin 6 (button)</td><td>polarity does not matter</td></tr>
+          <tr><td><span class="sw" style="background:var(--wire-orange)"></span>Orange · IN1</td><td>pin 1 (GND)</td><td></td></tr>
+          <tr><td><span class="sw" style="background:var(--wire-brown)"></span>Brown · IN2</td><td>unused</td><td>insulate</td></tr>
+          <tr><td>White, yellow, blue, grey, violet</td><td>unused</td><td>insulate individually</td></tr>
         </tbody>
       </table>
     </div>
   </section>
 
   <section>
-    <h2>Nicht anschließen</h2>
+    <h2>Do not connect</h2>
     <div class="bad">
-      <strong>Diese Verbindungen stören die Lüftung</strong>
+      <strong>These connections disturb the ventilation unit</strong>
       <ul>
-        <li><b>Pin 2 und 3</b>: Datenbus zum Bedienteil. Shelly-Eingänge dort legen die LEDs lahm.</li>
-        <li><b>Grün oder eine andere Masse an Pin 6</b>: wirkt wie ein dauerhaft gedrückter Taster, nach 5 s wird die Filteranzeige zurückgesetzt.</li>
-        <li><b>Pin 4 und 5</b>: nicht gemessen, frei lassen.</li>
+        <li><b>Pins 2 and 3</b>: data bus to the control panel. Shelly inputs there stop the LEDs from working.</li>
+        <li><b>Green or any other ground on pin 6</b>: acts like a permanently pressed button, after 5 s the filter indicator is reset.</li>
+        <li><b>Pins 4 and 5</b>: not measured, leave unconnected.</li>
       </ul>
     </div>
   </section>
 
   <section>
-    <h2>Shelly-Einstellungen</h2>
+    <h2>Shelly settings</h2>
     <ul class="plain">
-      <li>Eingänge: <b>entkoppelt</b>.</li>
-      <li>OUT1: <b>Auto-Aus nach 0,3 s</b> und Zustand nach Stromausfall <b>Aus</b>.</li>
-      <li>Keine Aktionen oder Szenen, die IN1 mit OUT1 verknüpfen.</li>
-      <li>Skript „aeromat-loxone.js“ mit <b>Run on startup</b>.</li>
+      <li>Inputs: <b>detached</b>.</li>
+      <li>OUT1: <b>auto-off after 0.3 s</b> and state after power failure <b>off</b>.</li>
+      <li>No actions or scenes that link IN1 to OUT1.</li>
+      <li>Script “aeromat-loxone.js” with <b>Run on startup</b>.</li>
     </ul>
-    <p class="lead">Test über das Skript, IP und Skript-ID ggf. anpassen:</p>
+    <p class="lead">Test via the script, adjust IP and script ID if needed:</p>
     <div class="url">
-      <code id="test-url">http://SHELLY-IP/script/1/lueftung?stufe=2</code>
-      <button class="btn" id="copy-btn" type="button">Kopieren</button>
+      <code id="test-url">http://SHELLY-IP/script/1/ventilation?level=2</code>
+      <button class="btn" id="copy-btn" type="button">Copy</button>
     </div>
   </section>
 
   <section>
-    <h2>Stufenzyklus</h2>
-    <p class="lead">Ein Druck schaltet eine Stufe weiter. Nach Stromausfall startet das Gerät in Stufe 1.</p>
+    <h2>Level cycle</h2>
+    <p class="lead">Each press advances one level. After a power failure the unit starts in level 1.</p>
     <div class="stages">
-      <div class="stage"><b>Aus</b><div class="leds"><span class="led"></span><span class="led"></span></div><small>keine LED</small></div>
-      <div class="stage"><b>Stufe 1</b><div class="leds"><span class="led on"></span><span class="led"></span></div><small>ca. 21 m³/h</small></div>
-      <div class="stage"><b>Stufe 2</b><div class="leds"><span class="led on"></span><span class="led on"></span></div><small>ca. 37 m³/h</small></div>
-      <div class="stage"><b>Stufe 3</b><div class="leds"><span class="led blink"></span><span class="led blink"></span></div><small>ca. 56 m³/h, LEDs blinken</small></div>
+      <div class="stage"><b>Off</b><div class="leds"><span class="led"></span><span class="led"></span></div><small>no LED</small></div>
+      <div class="stage"><b>Level 1</b><div class="leds"><span class="led on"></span><span class="led"></span></div><small>approx. 21 m³/h</small></div>
+      <div class="stage"><b>Level 2</b><div class="leds"><span class="led on"></span><span class="led on"></span></div><small>approx. 37 m³/h</small></div>
+      <div class="stage"><b>Level 3</b><div class="leds"><span class="led blink"></span><span class="led blink"></span></div><small>approx. 56 m³/h, LEDs blink</small></div>
     </div>
   </section>
 </main>
@@ -228,14 +228,13 @@ code { font-family: var(--font-mono); font-size: 13px; }
     function selectFallback() {
       var r = document.createRange(); r.selectNodeContents(code);
       var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
-      btn.textContent = 'Markiert';
+      btn.textContent = 'Selected';
     }
     try {
-      navigator.clipboard.writeText(code.textContent).then(function () { btn.textContent = 'Kopiert'; }, selectFallback);
+      navigator.clipboard.writeText(code.textContent).then(function () { btn.textContent = 'Copied'; }, selectFallback);
     } catch (e) { selectFallback(); }
-    setTimeout(function () { btn.textContent = 'Kopieren'; }, 2000);
+    setTimeout(function () { btn.textContent = 'Copy'; }, 2000);
   });
 })();
 </script>
-
 </html>

@@ -1,113 +1,113 @@
 # aeromat-smart
 
-Smart-Home-Anbindung eines **Siegenia AEROMAT VT WRG 1100** (dezentraler Fassadenlüfter mit Wärmerückgewinnung) über einen **Shelly Plus Uni** und **Loxone**.
+Smart home integration of a **Siegenia AEROMAT VT WRG 1100** (decentralised façade ventilation unit with heat recovery) using a **Shelly Plus Uni** and **Loxone**.
 
-Das Gerät hat keine Smart-Home-Schnittstelle. Der Shelly simuliert den Folientaster am Bedienteil, ein Skript merkt sich die Stufe und meldet sie per UDP an den Loxone Miniserver. Optional kommen Feuchte (DHT22 am Shelly) und CO₂ (ESP32 + SCD41) dazu.
+The unit has no smart home interface. The Shelly simulates the membrane button on the control panel, a script keeps track of the fan level and reports it to the Loxone Miniserver via UDP. Optionally, humidity (DHT22 on the Shelly) and CO₂ (ESP32 + SCD41) can be added.
 
-> Kein offizielles Projekt von Siegenia, Shelly oder Loxone. Eingriffe ins Gerät auf eigene Gefahr. Arbeiten an 230 V nur durch eine Elektrofachkraft.
+> Not an official project of Siegenia, Shelly or Loxone. Modifying the unit is at your own risk. Work on 230 V must be done by a qualified electrician.
 
-## Inhalt
+## Contents
 
-| Datei | Zweck |
+| File | Purpose |
 |---|---|
-| [`shelly/aeromat-loxone.js`](shelly/aeromat-loxone.js) | Skript für den Shelly Plus Uni: Stufensteuerung per HTTP, Rückmeldung per UDP |
-| [`esphome/co2-raum.yaml`](esphome/co2-raum.yaml) | Optional: ESPHome-Konfiguration für einen CO₂-Sensor (SCD40/41) am ESP32 |
-| [`docs/schaltplan.html`](docs/schaltplan.html) | Schaltplan mit Belegung, im Browser öffnen |
+| [`shelly/aeromat-loxone.js`](shelly/aeromat-loxone.js) | Script for the Shelly Plus Uni: level control via HTTP, feedback via UDP |
+| [`esphome/co2-room.yaml`](esphome/co2-room.yaml) | Optional: ESPHome configuration for a CO₂ sensor (SCD40/41) on an ESP32 |
+| [`docs/wiring.html`](docs/wiring.html) | Wiring diagram with pin assignment, open in a browser |
 
-## Das Gerät
+## The unit
 
-- Bedienung über einen Folientaster, Zyklus **Aus → 1 → 2 → 3 → Aus**
-- Nach Stromausfall startet das Gerät in **Stufe 1**
-- Taster 5 s halten setzt die Filterwechselanzeige zurück
-- LED-Anzeige: Stufe 1 = LED 1, Stufe 2 = beide LEDs, Stufe 3 = beide blinken
-- Luftleistung laut Anleitung ca. 21 / 37 / 56 m³/h
-- Versorgung über externes Netzteil 24 V DC / 2,5 A
-- Variante ohne Sensoren: kein Automatikmodus, vermutlich kein eigener Frostschutz
+- Operated with a membrane button, cycle **Off → 1 → 2 → 3 → Off**
+- After a power failure the unit starts in **level 1**
+- Holding the button for 5 s resets the filter change indicator
+- LED indication: level 1 = LED 1, level 2 = both LEDs, level 3 = both blinking
+- Airflow according to the manual approx. 21 / 37 / 56 m³/h
+- Powered by an external 24 V DC / 2.5 A power supply
+- Variant without sensors: no automatic mode, probably no built-in frost protection
 
-### Hauptplatine
+### Main board
 
-ATmega328P als Controller, P82B96 als I²C-Puffer zum Bedienteil, MC34063 für die 5-V-Logik, 5-fach-DIP-Schalter. Kein Hersteller aufgedruckt, keine öffentlichen Unterlagen.
+ATmega328P as controller, P82B96 as I²C buffer to the control panel, MC34063 for the 5 V logic supply, 5-way DIP switch. No manufacturer marking, no public documentation.
 
-| Klemme | Belegung |
+| Terminal | Assignment |
 |---|---|
-| 1–6 | frei, Funktion unbekannt |
-| 7–10 | frei, vermutlich Sensoranschluss |
-| 11–13, 14–16 | Lüfter 1 und 2 (Gelb / Schwarz / Rot) |
+| 1–6 | unused, function unknown |
+| 7–10 | unused, probably a sensor connection |
+| 11–13, 14–16 | fan 1 and fan 2 (yellow / black / red) |
 | 12 | GND |
-| 17 | GND (Einspeisung) |
-| 18 | +24 V (Einspeisung) |
+| 17 | GND (supply) |
+| 18 | +24 V (supply) |
 
-### Roter Stecker zum Bedienteil (6-polig, Flachbandkabel)
+### Red connector to the control panel (6-pin, ribbon cable)
 
-| Pin | Funktion |
+| Pin | Function |
 |---|---|
 | 1 | GND |
-| 2, 3 | sehr wahrscheinlich I²C-Datenbus zum Bedienteil, **nichts anschließen** |
-| 4, 5 | nicht gemessen |
-| 6 | Tasterleitung: 5 V in Ruhe, 0 V gedrückt |
+| 2, 3 | most likely the I²C data bus to the control panel, **do not connect anything** |
+| 4, 5 | not measured |
+| 6 | button line: 5 V idle, 0 V pressed |
 
-## Verdrahtung Shelly Plus Uni
+## Shelly Plus Uni wiring
 
-| Shelly-Ader | Anschluss |
+| Shelly wire | Connection |
 |---|---|
-| Rot (VAC1) | Klemme 18 (+24 V) |
-| Schwarz (VAC2) | Klemme 17 (GND) |
-| Grün (GND) | Klemme 12 |
-| OUT1 a | Pin 1 (GND) |
-| OUT1 b | Pin 6 (Taster) |
-| Orange (IN1) | Pin 1 |
-| Blau / Gelb / Grün | optional DHT22 (DATA / VCC / GND) |
-| übrige Adern | frei, einzeln isolieren |
+| Red (VAC1) | terminal 18 (+24 V) |
+| Black (VAC2) | terminal 17 (GND) |
+| Green (GND) | terminal 12 |
+| OUT1 a | pin 1 (GND) |
+| OUT1 b | pin 6 (button) |
+| Orange (IN1) | pin 1 |
+| Blue / yellow / green | optional DHT22 (DATA / VCC / GND) |
+| remaining wires | unused, insulate individually |
 
-**Nicht anschließen:** Shelly-Eingänge an Pin 2/3 legen die LEDs lahm. Masse an Pin 6 wirkt wie ein dauerhaft gedrückter Taster.
+**Do not connect:** Shelly inputs on pins 2/3 stop the LEDs from working. Ground on pin 6 acts like a permanently pressed button.
 
-## Shelly einrichten
+## Shelly setup
 
-1. Eingänge **entkoppelt**, OUT1 **Auto-Aus 0,3 s**, Zustand nach Stromausfall **Aus**.
-2. Skript `shelly/aeromat-loxone.js` anlegen, starten, **Run on startup** aktivieren.
-3. UDP-Ziel setzen (Port frei wählbar):
+1. Inputs **detached**, OUT1 **auto-off 0.3 s**, state after power failure **off**.
+2. Create the script `shelly/aeromat-loxone.js`, start it and enable **Run on startup**.
+3. Set the UDP target (any free port):
    `http://SHELLY-IP/rpc/Sys.SetConfig?config={"rpc_udp":{"dst_addr":"MINISERVER-IP:7010"}}`
 
-### HTTP-Schnittstelle
+### HTTP interface
 
-`http://SHELLY-IP/script/<ID>/lueftung` mit:
+`http://SHELLY-IP/script/<ID>/ventilation` with:
 
-| Parameter | Wirkung |
+| Parameter | Effect |
 |---|---|
-| `?stufe=0..3` | direkt auf Stufe |
-| `?prozent=0..100` | Lüftergeschwindigkeit in %, wird in eine Stufe umgerechnet |
-| `?cmd=on` / `off` / `next` / `up` / `down` | ein, aus, weiter, höher, tiefer |
-| `?sync=0..3` | Zähler korrigieren, ohne zu drücken |
-| ohne Parameter | Status als JSON |
+| `?level=0..3` | go directly to a level |
+| `?percent=0..100` | fan speed in %, mapped to a level |
+| `?cmd=on` / `off` / `next` / `up` / `down` | on, off, next, up, down |
+| `?sync=0..3` | correct the counter without pressing |
+| no parameter | status as JSON |
 
-Das Skript zählt seine eigenen Pulse (`useInput: false`). Ein Druck am Gerät verstellt den Zähler, bis Loxone den nächsten Wert schickt oder `?sync=` aufgerufen wird.
+The script counts its own pulses (`useInput: false`). A press on the unit puts the counter out of step until Loxone sends the next value or `?sync=` is called.
 
-## Loxone einrichten
+## Loxone setup
 
-**Rückmeldung:** Virtueller UDP-Eingang (Absender = Shelly-IP, Port wie oben) mit diesen Befehlen:
+**Feedback:** Virtual UDP Input (sender = Shelly IP, port as above) with these commands:
 
-| Eingang | Befehlserkennung | Typ |
+| Input | Command recognition | Type |
 |---|---|---|
-| AEROMAT An | `"aeromat_an":\v` | digital |
-| AEROMAT Stufe 1–3 | `"aeromat_s1":\v` … `"aeromat_s3":\v` | digital |
-| AEROMAT Stufe | `"aeromat_stufe":\v` | analog |
-| Feuchte (DHT22) | `humidity:100\i"rh":\i\v` | analog |
-| Temperatur (DHT22) | `temperature:100\i"tC":\i\v` | analog |
+| AEROMAT on | `"aeromat_on":\v` | digital |
+| AEROMAT level 1–3 | `"aeromat_l1":\v` … `"aeromat_l3":\v` | digital |
+| AEROMAT level | `"aeromat_level":\v` | analog |
+| Humidity (DHT22) | `humidity:100\i"rh":\i\v` | analog |
+| Temperature (DHT22) | `temperature:100\i"tC":\i\v` | analog |
 
-**Steuerung:** Virtueller Ausgang `http://SHELLY-IP`, Ausgangsbefehl analog („Als Digitalausgang verwenden“ abwählen):
-`/script/1/lueftung?prozent=<v>` oder `/script/1/lueftung?stufe=<v>`
+**Control:** Virtual Output `http://SHELLY-IP`, analog output command (untick "Use as digital output"):
+`/script/1/ventilation?percent=<v>` or `/script/1/ventilation?level=<v>`
 
-**Regelung:** Baustein **Lüftung** der Intelligenten Raumregelung zuordnen, Feuchte an `Hi` (oder an die IRR), Ausgang `F` an den Prozent-Befehl. Sinnvolle Anpassungen:
+**Control logic:** Assign the **Ventilation** block to the Intelligent Room Controller, connect humidity to `Hi` (or to the IRC), and output `F` to the percent command. Useful adjustments:
 
-- `Ivp` auf ca. 50–60 %, sonst wird bei Anwesenheit trotz hoher Feuchte nicht stärker gelüftet
+- `Ivp` to approx. 50–60 %, otherwise ventilation is not increased during presence despite high humidity
 - `Hmax` 55–60 %
-- `Fpt` (Frostschutz) passend zur Außentemperatur
-- im Sommer Feuchte-Intensivlüftung begrenzen, schwüle Außenluft bringt sonst zusätzliche Feuchte
+- `Fpt` (frost protection) to suit the outdoor temperature
+- limit humidity-driven intensive ventilation in summer, humid outdoor air would otherwise add moisture
 
 ## Optional: CO₂
 
-ESP32 + Sensirion SCD41 mit [`esphome/co2-raum.yaml`](esphome/co2-raum.yaml). Loxone liest den Wert per Virtuellem HTTP-Eingang `http://ESP-IP/sensor/co2` mit Befehlserkennung `"value":\v` und gibt ihn an den CO2-Eingang des Lüftungsbausteins.
+ESP32 + Sensirion SCD41 with [`esphome/co2-room.yaml`](esphome/co2-room.yaml). Loxone reads the value via a Virtual HTTP Input `http://ESP-IP/sensor/co2` with command recognition `"value":\v` and feeds it into the CO2 input of the ventilation block.
 
-## Lizenz
+## License
 
 [MIT](LICENSE)
