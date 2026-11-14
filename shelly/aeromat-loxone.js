@@ -143,6 +143,11 @@ if (CFG.heartbeatS > 0) {
 }
 
 // --- HTTP interface for Loxone -------------------------------------------
+// Loxone may send decimals with a comma (e.g. "20,0")
+function toNum(v) {
+  return Number(String(v).replace(",", "."));
+}
+
 function parseQuery(q) {
   let r = {};
   if (!q) return r;
@@ -157,9 +162,9 @@ function parseQuery(q) {
 HTTPServer.registerEndpoint("ventilation", function (req, res) {
   let q = parseQuery(req.query);
   let ok = true;
-  if (q.level !== undefined) ok = setTarget(Math.round(Number(q.level)));
+  if (q.level !== undefined) ok = setTarget(Math.round(toNum(q.level)));
   else if (q.percent !== undefined) {
-    let p = Number(q.percent);
+    let p = toNum(q.percent);
     if (!(p >= 0 && p <= 100)) ok = false;
     else ok = setTarget(p <= 0 ? 0 : (p <= CFG.pct1 ? 1 : (p <= CFG.pct2 ? 2 : 3)));
   }
@@ -169,7 +174,7 @@ HTTPServer.registerEndpoint("ventilation", function (req, res) {
   else if (q.cmd === "up") ok = setTarget(Math.min(3, target + 1));
   else if (q.cmd === "down") ok = setTarget(Math.max(0, target - 1));
   else if (q.sync !== undefined) {
-    let l = Math.round(Number(q.sync));
+    let l = Math.round(toNum(q.sync));
     if (l >= 0 && l <= 3) {
       level = l;
       target = l;
