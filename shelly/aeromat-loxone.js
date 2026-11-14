@@ -1,7 +1,7 @@
 // =====================================================================
 //  AEROMAT VT WRG 1100 – fan level control with Shelly Plus Uni + Loxone
 // ---------------------------------------------------------------------
-//  OUT1 (switch:0)  presses the membrane button   (pin 6 <-> pin 1)
+//  OUT1/OUT2       presses the membrane button   (pin 6 <-> pin 1), see CFG.outputId
 //  Level cycle:     Off(0) -> 1 -> 2 -> 3 -> Off(0)
 //
 //  Control from Loxone (Virtual Output, HTTP, no login):
@@ -28,6 +28,9 @@ let CFG = {
   //        (use this when IN1 is not wired to pin 6).
   // true:  IN1 on pin 6 counts every press, including manual ones on the unit.
   useInput: false,
+
+  outputId: 0,        // Shelly output that presses the button: 0 = OUT1, 1 = OUT2
+  inputId: 0,         // Shelly input that reads the button line: 0 = IN1, 1 = IN2
 
   startLevel: 1,      // level after a power failure (the unit starts in level 1)
   pulseMs: 300,       // duration of one button press
@@ -63,7 +66,7 @@ function pulse() {
   busy = true;
   pulseActive = true;
   edgeSeen = false;
-  Shelly.call("Switch.Set", { id: 0, on: true, toggle_after: CFG.pulseMs / 1000 });
+  Shelly.call("Switch.Set", { id: CFG.outputId, on: true, toggle_after: CFG.pulseMs / 1000 });
   Timer.set(CFG.pulseMs + CFG.gapMs, false, function () {
     pulseActive = false;
     if (!CFG.useInput) {
@@ -92,7 +95,7 @@ function setTarget(l) {
 // --- IN1: detect button presses (only with useInput: true) -------------
 Shelly.addStatusHandler(function (e) {
   if (!CFG.useInput) return;
-  if (e.component !== "input:0" || !e.delta || e.delta.state !== true) return;
+  if (e.component !== "input:" + CFG.inputId || !e.delta || e.delta.state !== true) return;
   let now = Date.now();
   if (now - lastEdge < CFG.debounceMs) return;
   lastEdge = now;
@@ -174,6 +177,6 @@ HTTPServer.registerEndpoint("ventilation", function (req, res) {
 });
 
 // --- Start ----------------------------------------------------------------
-Shelly.call("Switch.Set", { id: 0, on: false });
+Shelly.call("Switch.Set", { id: CFG.outputId, on: false });
 scheduleReport();
 print("AEROMAT script started, level " + level + ", IN1 " + (CFG.useInput ? "enabled" : "disabled"));
