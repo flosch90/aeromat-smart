@@ -91,6 +91,8 @@ With `useInput: true` (default) input 0 detects every press, including manual pr
 | AEROMAT on | `"aeromat_on":\v` | digital |
 | AEROMAT level 1–3 | `"aeromat_l1":\v` … `"aeromat_l3":\v` | digital |
 | AEROMAT level | `"aeromat_level":\v` | analog |
+| AEROMAT manual off | `"aeromat_manual_off":\v` | digital (pulse) |
+| AEROMAT manual on | `"aeromat_manual_on":\v` | digital (pulse) |
 | Humidity (DHT22) | `humidity:100\i"rh":\i\v` | analog |
 | Temperature (DHT22) | `temperature:100\i"tC":\i\v` | analog |
 
@@ -103,6 +105,16 @@ With `useInput: true` (default) input 0 detects every press, including manual pr
 - `Hmax` 55–60 %
 - `Fpt` (frost protection) to suit the outdoor temperature
 - limit humidity-driven intensive ventilation in summer, humid outdoor air would otherwise add moisture
+
+### Pause automation after a manual switch-off
+
+When the unit is switched off with the button, the script sends `aeromat_manual_off` = 1 (and 0 again 2 s later). Switching back on with the button sends `aeromat_manual_on` = 1.
+
+- `aeromat_manual_off` → trigger input of a **Monoflop** with the desired pause (e.g. 2 h)
+- `aeromat_manual_on` → reset input of the same Monoflop (manual switch-on ends the pause)
+- Monoflop output → input `Off` of the **Ventilation** block
+
+While the pause is active, the block outputs 0 %, so it does not switch the unit back on. When the pause ends, `F` returns to its calculated value and Loxone sends it to the Shelly.
 
 ## Optional: CO₂
 

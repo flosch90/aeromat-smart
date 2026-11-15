@@ -20,7 +20,10 @@
 //    The script emits a Shelly event "aeromat". The Shelly sends it to the
 //    Miniserver via "RPC over UDP", e.g.:
 //    ..."data":{"aeromat_level":2,"aeromat_on":1,"aeromat_l1":0,
-//               "aeromat_l2":1,"aeromat_l3":0}...
+//               "aeromat_l2":1,"aeromat_l3":0,
+//               "aeromat_manual_off":0,"aeromat_manual_on":0}...
+//    aeromat_manual_off / _on = 1 in the first report after the level was
+//    changed with the button on the unit (to off / to a level 1..3).
 //    Requirement: rpc_udp.dst_addr = MINISERVER-IP:PORT on the Shelly.
 // =====================================================================
 
@@ -58,6 +61,7 @@ let pulseActive = false;
 let edgeSeen = false;
 let lastEdge = 0;
 let reportTimer = null;
+let manualPending = false;
 
 function nowMs() {
   return typeof Shelly.getUptimeMs === "function" ? Shelly.getUptimeMs() : Date.now();
@@ -113,19 +117,26 @@ Shelly.addStatusHandler(function (e) {
     edgeSeen = true;
   } else {
     target = level;
+    manualPending = true;
     print("Manual press detected: level " + level);
   }
 });
 
 // --- Feedback via UDP (Shelly event) ------------------------------------
 function report() {
+  let wasManual = manualPending;
   Shelly.emitEvent("aeromat", {
     aeromat_level: level,
     aeromat_on: level > 0 ? 1 : 0,
     aeromat_l1: level === 1 ? 1 : 0,
     aeromat_l2: level === 2 ? 1 : 0,
-    aeromat_l3: level === 3 ? 1 : 0
+    aeromat_l3: level === 3 ? 1 : 0,
+    aeromat_manual_off: manualPending && level === 0 ? 1 : 0,
+    aeromat_manual_on: manualPending && level > 0 ? 1 : 0
   });
+  manualPending = false;
+  // send a second report with the manual flags back at 0, so Loxone sees a clean pulse
+  if (wasManual) Timer.set(2000, false, report);
 }
 
 function scheduleReport() {
